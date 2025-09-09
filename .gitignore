@@ -1,0 +1,5 @@
+# Default ignored files
+/shelf/
+/.git/
+/data/ml-100k/
+/data/sentences/

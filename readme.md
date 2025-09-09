@@ -1,36 +1,264 @@
+# Hadoop生态
+
+---
+
+## Hadoop
+
+* **是什么** ：一个大数据处理的框架/生态系统，不是单一软件。
+* **作用** ：提供大数据的存储、计算、管理能力。
+* **核心模块** ：
+
+1. **HDFS** → 分布式存储
+2. **YARN** → 资源调度/作业管理
+3. **MapReduce** → 分布式计算框架
+4. **（外加 HBase、Hive、Spark 等扩展组件）**
+
+可以理解为： **Hadoop = 一整套分布式大数据操作系统** 。
+
+---
+
+## HDFS (Hadoop Distributed File System)
+
+* **是什么** ：Hadoop 的分布式文件系统。
+* **作用** ：把很多台机器的磁盘组合在一起，当作一个“超级大硬盘”来存放数据。
+* **特点** ：
+* 文件会被切分成数据块（通常 128MB 一块），分散存储在不同机器上。
+* 有副本机制（默认 3 份），保证数据不丢失。
+* **比喻** ：像把一个大文件柜切分成很多抽屉，放到不同的房间，钥匙（NameNode）知道每个抽屉在哪。
+
+**HDFS中有NameNode和DataNode:**
+
+**NameNode**
+
+* **是什么**：HDFS 的“大脑”，文件系统的管理者。
+* **作用**：
+
+  * 负责存储文件的元数据（比如 `/user/data/file1.txt` 存在哪些 DataNode、文件大小、权限等信息）。
+  * 不存储文件内容，只存储目录树和块映射信息。
+  * 客户端要访问 HDFS 的文件时，先找 NameNode。
+* **举例**：你往 HDFS 上传一个 128MB 的文件 → NameNode 记录：这个文件被切成 2 个块，分别存储在哪些 DataNode 上。
+
+**DataNode**
+
+* **是什么**：HDFS 的“工人”，存储实际的数据块。
+* **作用**：
+
+  * 存储文件块（block），定期向 NameNode 汇报健康状态和存储块信息。
+  * 负责读写数据（客户端直接和 DataNode 交互，而不是 NameNode）。
+* **举例**：当你写文件到 HDFS 时，数据最终是写到 DataNode 磁盘上。
+
+## MapReduce
+
+* **是什么** ：Hadoop 提供的  **分布式计算模型** 。
+* **作用** ：用来在集群里并行处理大规模数据。
+* **运行流程** ：
+
+1. **Map** ：把任务分成小块，分发给多个节点（例如：每个节点统计自己那部分单词词频）。
+2. **Reduce** ：把各个节点的结果汇总（例如：合并所有节点的词频，得到全局统计）。
+
+* **比喻** ：像老师布置作业，把试卷分给很多学生（Map），最后收回来汇总成绩（Reduce）。
+
+---
+
+## YARN (Yet Another Resource Negotiator)
+
+* **是什么** ：Hadoop 的  **资源管理与作业调度框架** 。
+* **作用** ：决定  **哪个任务在哪台机器上跑** ，以及如何分配 CPU/内存等资源。
+* **核心角色** ：
+* **ResourceManager**
+
+  * **是什么**：**整个集群**的“资源总管”。
+  * **作用**：
+
+    * 管理集群的计算资源（CPU、内存等）。
+    * 调度任务：比如你提交一个 MapReduce 作业，ResourceManager 会决定在哪些节点启动对应的任务。
+* **NodeManager**
+
+  * **是什么**：每个**工作节点**上的“资源代理”。
+  * **作用**：
+
+    * 向 ResourceManager 汇报本机的资源情况（多少内存、多少 CPU 可用）。
+    * 负责启动和监控在本节点上运行的任务（容器）。
+  * **关系**：NodeManager 就像一个“分公司经理”，听 ResourceManager 的调度安排。
+
+---
+
+## HBase
+
+* **是什么** ：基于 HDFS 构建的  **分布式 NoSQL 数据库** 。
+* **作用** ：用来存储  **大规模结构化数据** ，支持快速的随机读写（不像 HDFS 只能顺序读写）。
+* **特点** ：
+* 数据模型是  **表 → 行键(RowKey) → 列族 → 列 → 值** 。
+* 可以存储数十亿行、数百万列的大表。
+* **比喻** ：HDFS 像一个“大仓库”（文件系统），但仓库只能顺序翻找；HBase 在仓库上面加了一层“索引系统”，让你可以像查字典一样快速定位某一行某一列。
+
+---
+
+## ZooKeeper
+
+在 Hadoop 生态里， **HDFS + YARN 本身就能跑起来** ，但一旦引入  **HBase** ，就必须有 **ZooKeeper** 才能正常工作。
+
+---
+
+* ZooKeeper 是一个  **分布式协调服务** 。
+* 它自己并不是数据库、存储或计算引擎，而是一个  **管理集群的“调度员/管理员”** 。
+* 可以用来：
+
+  1. 管理  **分布式应用的配置** （例如谁是主节点）。
+  2. 提供  **命名服务** （给节点/服务取名字）。
+  3. 提供  **分布式锁** （保证多个客户端操作的顺序和互斥）。
+  4. 监控节点状态（心跳检测，宕机感知）。
+
+---
+
+### 为什么 HBase 需要 ZooKeeper？
+
+HBase 是一个  **分布式数据库** ，它有：
+
+* **HMaster** （负责管理表的元数据、分配 RegionServer）。
+* **HRegionServer** （真正存储数据，处理读写请求）。
+
+问题来了：
+
+* 如果有多个 HMaster，谁来决定  **哪个是“主 HMaster”** ？
+* 如果某个 RegionServer 挂掉了，谁来通知 HMaster ？
+* 客户端如何快速找到自己要访问的 RegionServer？
+
+ 这些协调、选主、状态检测的事情，就交给了  **ZooKeeper** 。
+
+---
+
+在配置的伪分布式环境时
+
+* 单独启动了 ZooKeeper（`zkServer.sh start`）。
+* HBase 配置里写了：
+
+  ```xml
+  <property>
+      <name>hbase.zookeeper.quorum</name>
+      <value>localhost</value>
+  </property>
+  <property>
+      <name>hbase.zookeeper.property.clientPort</name>
+      <value>2181</value>
+  </property>
+  ```
+
+  意味着：
+
+  * **HBase Master、RegionServer、客户端** 都会去找 `localhost:2181` 这个 ZooKeeper，来完成“谁是主 HMaster、RegionServer 状态、客户端路由”等协调功能。
+
+---
+
+## 关系总结（一句话版）
+
+* **Hadoop** = 整个生态系统
+* **HDFS** = 存储层（存大文件）
+* **MapReduce** = 计算层（怎么处理数据）
+* **YARN** = 资源调度层（让任务跑起来）
+* **HBase** = 数据库（在 HDFS 上建表，快速查改数据）
+
+---
+
+要不要我给你画一张  **整体架构图** （HDFS + YARN + MapReduce + HBase）？这样你能更直观地看到它们之间的关系。
+
+# 分布方式比较
+
+---
+
+## 单机模式（Standalone Mode）
+
+* **特点** ：
+* 默认安装 Hadoop 后就是单机模式。
+* 所有进程都运行在一个 JVM 里，没有 HDFS，没有 YARN。
+* 数据存在本地文件系统（ext4/xfs 等）。
+* **用途** ：
+* 测试最基本的功能（例如写个 MapReduce 逻辑跑一下）。
+* 不涉及真正的分布式存储或计算。
+
+## 伪分布式（Pseudo-distributed Mode）
+
+* **特点** ：
+* 所有 Hadoop 组件（NameNode、DataNode、ResourceManager、NodeManager 等）都跑在 **一台机器** 上。
+* 进程之间还是通过网络（localhost）通信，模拟集群环境。
+* 数据存储在本机磁盘上，但逻辑上仍然使用 HDFS 的块、副本机制。
+* **用途** ：
+* 学习/开发阶段常用，可以在本地模拟完整的 Hadoop 运行环境。
+* 方便理解  **进程之间的关系** ，练习 HDFS + YARN + HBase 的启动与使用。
+
+---
+
+## 完全分布式（Fully-distributed Mode）
+
+* **特点** ：
+* Hadoop 部署在 **多台机器** 上（通常是几十到上千台）。
+* NameNode 负责全局元数据，DataNode 分布在各台机器上。
+* 任务由 ResourceManager 调度到不同机器上的 NodeManager 执行。
+* 具备真正的分布式存储和并行计算能力。
+* **用途** ：
+* 生产环境下使用，存储 TB/PB 级数据，支撑海量计算任务。
+
+---
+
+## 总结对比表
+
+| 模式       | 部署规模 | 进程分布 | 存储方式           | 使用场景             |
+| ---------- | -------- | -------- | ------------------ | -------------------- |
+| 单机模式   | 1 台机器 | 单进程   | 本地文件系统       | 最简单的功能测试     |
+| 伪分布式   | 1 台机器 | 多进程   | HDFS（存本地盘）   | 学习、实验、开发     |
+| 完全分布式 | 多台机器 | 多进程   | HDFS（跨机器存储） | 生产环境、大数据处理 |
+
+---
+
 # 环境配置
+
+这个板块实现的伪分布
+
 - ubuntu 24.04
 - hadoop-3.3.0
 - hbase-2.4.18
 - jdk 1.8.0_461
 - zookeeper-3.7.2
+
 ---
+
 ## 安装 JDK
+
 ### 解压
-在已经下载好`jdk-8u461-linux-x64.tar.gz`的目录下打开终端。
-把jdk的文件解压到`/usr/local/java`目录下
+
+在已经下载好 `jdk-8u461-linux-x64.tar.gz`的目录下打开终端。
+把jdk的文件解压到 `/usr/local/java`目录下
+
 ```bash
 sudo mkdir -p /usr/local/java
 sudo tar -zxvf jdk-8u461-linux-x64.tar.gz -C /usr/local/java
 ```
 
-
 ### 配置环境变量
-在`~/.bashrc`配置文件中修改java的配置：
+
+在 `~/.bashrc`配置文件中修改java的配置：
+
 ```bash
 export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 export PATH=$JAVA_HOME/bin:$PATH
 ```
+
 刷新环境：
+
 ```bash
 source ~/.bashrc
 java -version
 # 预期输出 java version "1.8.0_461"
 ```
+
 ---
+
 ## 配置SSH
+
 ### 安装并启动SSH服务
+
 在终端执行：
+
 ```bash
 sudo apt update
 sudo apt install openssh-server -y
@@ -51,7 +279,6 @@ systemctl status ssh
 
 如果看到 `active (running)` 就说明 SSH 已经正常运行。
 
-
 #### 配置免密登录（Hadoop 启动脚本需要）
 
 Hadoop 在启动时需要通过 SSH 登录 **本机的 localhost**，所以要配置免密。
@@ -63,6 +290,7 @@ ssh-keygen -t rsa -P ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
+
 然后给这个key起名
 ![img.png](img.png)
 测试是否能无密码登录：
@@ -76,8 +304,11 @@ ssh localhost
 ---
 
 ## 安装 Haddoop 3.3.0
+
 ### 下载&解压
-在已经下载好`hadoop-3.3.0.tar.gz`的目录下运行：
+
+在已经下载好 `hadoop-3.3.0.tar.gz`的目录下运行：
+
 ````bash
 tar -zxvf hadoop-3.3.0.tar.gz
 sudo mv hadoop-3.3.0 /usr/local/hadoop
@@ -103,15 +334,19 @@ hadoop version
 ### 修改配置文件
 
 在 `$HADOOP_HOME/etc/hadoop` 下修改对应的文件：
-(按照前面的流程做的是在`/usr/local/hadoop/etc/hadoop`下)
+(按照前面的流程做的是在 `/usr/local/hadoop/etc/hadoop`下)
+
 #### hadoop-env.sh
+
 直接添加一行即可
+
 ```bash
 export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 ```
 
 #### core-site.xml
-修改原来的`<configuration></configuration>`为
+
+修改原来的 `<configuration></configuration>`为
 因为现在是在本地模拟分布，所以使用localhost为ip地址。
 
 作用：配置Hadoop核心参数
@@ -121,6 +356,7 @@ export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 `fs.defaultFS`：定义默认文件系统为HDFS，地址是hdfs://localhost:9000
 
 `hadoop.tmp.dir`：指定Hadoop运行时的临时目录
+
 ```xml
 <configuration>
     <property>
@@ -135,7 +371,8 @@ export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 ```
 
 #### hdfs-site.xml
-修改原来的`<configuration></configuration>`
+
+修改原来的 `<configuration></configuration>`
 
 作用：配置HDFS（Hadoop分布式文件系统）相关参数
 
@@ -143,7 +380,7 @@ export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 
 dfs.replication：设置数据副本数为1（单机伪分布式）
 
-dfs.namenode.name.dir：NameNode元数据存储位置 
+dfs.namenode.name.dir：NameNode元数据存储位置
 
 dfs.datanode.data.dir：DataNode数据存储位置
 
@@ -165,7 +402,8 @@ dfs.datanode.data.dir：DataNode数据存储位置
 ```
 
 #### mapred-site.xml
-修改原来的`<configuration></configuration>`
+
+修改原来的 `<configuration></configuration>`
 
 ```xml
 <configuration>
@@ -178,7 +416,9 @@ dfs.datanode.data.dir：DataNode数据存储位置
 ```
 
 #### yarn-site.xml
-修改原来的`<configuration></configuration>`为
+
+修改原来的 `<configuration></configuration>`为
+
 ```xml
 <configuration>
     <property>
@@ -207,7 +447,9 @@ start-yarn.sh
 jps
 # 应该看到 NameNode、DataNode、SecondaryNameNode、ResourceManager、NodeManager
 ```
+
 可以通过下面的命令来停止之前的进程
+
 ````bash
 stop-dfs.sh
 stop-yarn.sh
@@ -225,7 +467,9 @@ Web UI：
 HBase 依赖 ZooKeeper。
 
 ### 下载 & 解压
-下载`apache-zookeeper-3.7.2-bin.tar.gz`压缩包，在文件所在目录运行：
+
+下载 `apache-zookeeper-3.7.2-bin.tar.gz`压缩包，在文件所在目录运行：
+
 ```bash
 tar -zxvf apache-zookeeper-3.7.2-bin.tar.gz
 sudo mv apache-zookeeper-3.7.2-bin /usr/local/zookeeper
@@ -242,6 +486,7 @@ cp zoo_sample.cfg zoo.cfg
 
 编辑 `zoo.cfg`：
 可以直接全部替换，或者找到对应项来替换：
+
 ```ini
 tickTime=2000
 dataDir=/usr/local/zookeeper/data
@@ -259,30 +504,36 @@ sudo mkdir -p /usr/local/zookeeper/logs
 ```
 
 ## 启动 ZooKeeper
+
 添加环境变量，编辑 `~/.bashrc`：
+
 ````bash
 export ZOOKEEPER_HOME=/usr/local/zookeeper
 export PATH=$PATH:$ZOOKEEPER_HOME/bin
 ````
+
 刷新
+
 ```bash
 source ~/.bashrc
 ```
-
 
 ```bash
 zkServer.sh start   # 运行
 zkServer.sh status  # 查看状态
 zkServer.sh stop   # 运行
 ```
+
 如果看到 `Mode: standalone`，说明启动成功。
 再用 `jps`，应该看到 `QuorumPeerMain` 进程。
----
+-----------------------
 
 ## 安装 HBase
 
 ### 下载 & 解压
-解压`hbase-2.4.18-bin.tar.gz`并移动
+
+解压 `hbase-2.4.18-bin.tar.gz`并移动
+
 ```bash
 tar -zxvf hbase-2.4.18-bin.tar.gz
 sudo mv hbase-2.4.18 /usr/local/hbase
@@ -307,8 +558,11 @@ source ~/.bashrc
 
 在 `$HBASE_HOME/conf` 下：
 （/usr/local/hbase/conf）
+
 #### hbase-env.sh
+
 添加语句
+
 ```bash
 export JAVA_HOME=/usr/local/java/jdk1.8.0_461
 export HBASE_MANAGES_ZK=false   # 因为我们自己启动了独立的 ZooKeeper
@@ -369,6 +623,7 @@ Web UI：
 start-dfs.sh
 start-yarn.sh
 ```
+
 * NameNode: [http://localhost:9870](http://localhost:9870)
 * YARN: [http://localhost:8088](http://localhost:8088)
 
@@ -377,6 +632,7 @@ start-yarn.sh
 ```bash
 zkServer.sh start
 ```
+
 3. 启动 HBase
 
 ```bash
@@ -384,32 +640,132 @@ start-hbase.sh
 ```
 
 * HBase Master: [http://localhost:16010](http://localhost:16010)
----
 
 ---
 
+---
 
 
+# 学习
+
+## 数据集
+
+### 数据集准备
+
+我采用的数据集是 `MovieLens 100K`。一个记录了电影评价的数据集。
+
+下面的命令可以下载并解压数据集文件到本地。
+
+```bash
+wget http://files.grouplens.org/datasets/movielens/ml-100k.zip -O ml-100k.zip
+unzip ml-100k.zip -d ml-100k
+```
+
+- 把数据解压到本地目录，方便后续逐文件上传或一次性上传目录。
 
 
+然后可以运行 `jps`来确认当前HDFS是否在运行。
+
+````bash
+# jps 列出当前 JVM 进程（查看 NameNode/DataNode/ResourceManager/NodeManager 等）
+jps
+````
+
+- jps 能快速看到 NameNode、DataNode 等进程是否在运行。若没有看到 NameNode/DataNode，需要先启动 Hadoop（start-dfs.sh / start-yarn.sh）。
+
+### 上传到HDFS
+
+可以运行 `scripts/upload_ml100k_to_hdfs.sh` 这个shell脚本，这个脚本实现了把刚才解压的数据集导入到HDFS中。
+
+下面几行是对hdfs文件系统的基本操作，和对linux文件系统的操作有点相似。
+
+```bash
+hdfs dfs -mkdir /input
+hdfs dfs -put localfile.txt /input
+hdfs dfs -ls /input
+hdfs dfs -cat /input/localfile.txt
+hdfs dfs -rm /input/localfile.txt
+```
 
 
+下面介绍的是这个脚本中实现的基本功能。
+
+1. 在 HDFS 上创建目标目录（按用户隔离，推荐放到 /user/$USER 下）
+
+````bash
+# 在 HDFS 上创建放置数据的目录（-p：如果上级目录不存在就一并创建）
+hdfs dfs -mkdir -p /user/$USER/input/ml-100k
+# 查看是否创建成功
+hdfs dfs -ls -d /user/$USER/input/ml-100k
+````
+
+- /user/$USER 是 Hadoop 推荐的用户目录，便于管理权限与后续运行 MR/YARN 作业时默认路径。
+- -p 可以一次创建多级目录，避免中间报错。
 
 
+2. 上传数据集中的关键文件（例如 u.data）
 
+````bash
+#!/bin/bash
+hdfs dfs -put ml-100k/u.data /user/$USER/input/ml-100k/u.data
+# 或者改名存放
+hdfs dfs -put ml-100k/u.data /user/$USER/input/ml-100k-u.data
+# 验证文件内容（只看前几行）
+hdfs dfs -cat /user/$USER/input/ml-100k/u.data | head -n 20
+````
 
+说明：
 
+- 如果只需某个文件，单独上传可以节省时间。
+- hdfs dfs -cat 可以在终端查看文件内容并用管道 head 查看前若干行，确认上传正确。
 
+3. 检查上传结果与空间占用
 
+````bash
+#!/bin/bash
+# 列出目录树（-R 递归）
+hdfs dfs -ls -R /user/$USER/input/ml-100k
+# 查看 HDFS 占用（-h 人类可读）
+hdfs dfs -du -h /user/$USER/input/ml-100k
+````
 
+说明：
 
+- -ls -R 可以确认所有文件是否都到位；-du -h 看文件占用大小、用于判断是否完整上传。
 
+4. （单机伪分布）把副本数设为 1（可选，但推荐）
 
+````bash
+#!/bin/bash
+# 把上传目录及其文件副本数统一设置为1，避免单机上生成多份浪费空间
+hdfs dfs -setrep -R -w 1 /user/$USER/input/ml-100k
+# 检查设置是否生效（查看副本数）
+hdfs dfs -ls -R /user/$USER/input/ml-100k | awk '{print $1, $2, $3, $4, $5, $6, $7, $8}'
+````
 
+说明：
 
+- 单机伪分布下默认副本可能仍然是1，但显式设置能避免在某些配置下出现多副本导致磁盘占用增大。
+- -R 递归，-w 等待操作完成。
 
+5. 如果遇到权限问题：修改 HDFS 上该目录的所有者或权限
 
+````bash
+#!/bin/bash
+# 把 HDFS 上的目录所属用户改为当前用户（需要有权限的情况下）
+hdfs dfs -chown -R $USER:$USER /user/$USER/input/ml-100k
+# 或修改权限（例如所有人可读）
+hdfs dfs -chmod -R 755 /user/$USER/input/ml-100k
+````
 
+说明：
 
+- chown/chmod 在多人或初次上传时常用，确保后续 MR 作业或用户可以访问文件。
 
+6. 若要删除并重新上传（例如上传错误）
 
+````bash
+#!/bin/bash
+# 删除 HDFS 上的目录（-rm -r 递归，-skipTrash 直接删除不放回回收）
+hdfs dfs -rm -r -skipTrash /user/$USER/input/ml-100k
+````
