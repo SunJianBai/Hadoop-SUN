@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # 目标主机与对应 sudo 密码（按顺序对应）
-HOSTS=("kxg@worker1" "xwb@worker2")
+HOSTS=("sun@worker1" "sun@worker2")
 PWDS=("123" "6")
 
 # 本地文件列表（源 -> 远端 /tmp 名称 -> 目标路径）
