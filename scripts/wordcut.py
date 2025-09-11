@@ -1,7 +1,8 @@
 import os
 import math
 import logging
-
+# 用于处理老师发的文件
+# 这个脚本用于将一个大的txt文件按每10000行分割成多个小文件
 # 指定输入文件和输出目录
 input_file_path = r"./data/sentences/sentences.txt"  # 输入的txt文件路径
 output_directory = r'./data/sentences/files'  # 指定的输出目录路径
