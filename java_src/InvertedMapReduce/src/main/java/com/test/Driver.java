@@ -17,7 +17,7 @@ public class Driver {
         //yarn 主resourcemanager通信地址
         conf.set("yarn.resourcemanager.hostname","master");
         //zookeeper集群，连接到HMaster
-        conf.set("hbase.zookeeper.quorum","master,worker1,worker2");
+        conf.set("hbase.zookeeper.quorum","master,worker1,worker2,worker3");
 
         Job job = Job.getInstance(conf);
         job.setJarByClass(Driver.class);

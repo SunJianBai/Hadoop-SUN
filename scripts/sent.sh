@@ -7,8 +7,13 @@
 set -euo pipefail
 
 # 目标主机与对应 sudo 密码（按顺序对应）
-HOSTS=("sun@worker1" "sun@worker2")
-PWDS=("123" "6")
+# HOSTS=("sun@worker1" "sun@worker2")
+# PWDS=("123" "6")
+
+HOSTS=("sun@worker3")
+PWDS=("zyh040822")
+HOSTS=("sun@worker1" "sun@worker2" "sun@worker3")
+PWDS=("123" "6" "zyh040822")
 
 # 本地文件列表（源 -> 远端 /tmp 名称 -> 目标路径）
 declare -a FILES_SRC=(

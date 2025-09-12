@@ -1,5 +1,5 @@
 127.0.0.1 localhost
-127.0.1.1 zzz
+192.168.43.76 zzz
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
@@ -11,4 +11,4 @@ ff02::2 ip6-allrouters
 192.168.43.76 master
 192.168.43.3 worker1
 192.168.43.57 worker2
-
+192.168.43.92 worker3
