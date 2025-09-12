@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Hadoop-SUN.iml" filepath="$PROJECT_DIR$/.idea/Hadoop-SUN.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java_src/InvertedMapReduce/InvertedMapReduce.iml" filepath="$PROJECT_DIR$/java_src/InvertedMapReduce/InvertedMapReduce.iml" />
+    </modules>
+  </component>
+</project>
