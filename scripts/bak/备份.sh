@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 备份 sent.sh 中列出的改动文件到本地完全分布目录（保留目录结构与权限）
+# 备份 sent.sh 中列出的改动文件到指定分布目录（保留目录结构与权限）
 # 用法: ./备份.sh
 set -euo pipefail
 

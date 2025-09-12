@@ -42,7 +42,7 @@
   <!-- 使用 HDFS 存储 HBase 数据 -->
   <property>
     <name>hbase.rootdir</name>
-    <value>hdfs://master:9000/hbase</value>
+    <value>hdfs://localhost:9000/hbase</value>
   </property>
 
   <!-- 表示这是一个分布式集群（即便是伪分布式） -->
@@ -54,7 +54,7 @@
   <!-- ZooKeeper 配置 -->
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>master,worker1,worker2</value>
+    <value>localhost</value>
   </property>
   
   <property>

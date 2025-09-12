@@ -19,7 +19,7 @@
 <configuration>
   <property>
     <name>dfs.replication</name>
-    <value>3</value> <!-- 三个节点，副本数设为3 -->
+    <value>1</value> <!-- 三个节点，副本数设为3 -->
   </property>
   
   <property>
