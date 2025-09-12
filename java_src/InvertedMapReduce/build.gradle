@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.test'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.hadoop:hadoop-common:3.3.5'
+    implementation 'org.apache.hadoop:hadoop-client:3.3.5'
+    implementation 'org.apache.hbase:hbase-common:2.5.4'
+    implementation 'org.apache.hbase:hbase-client:2.5.4'
+    implementation 'org.apache.hbase:hbase-mapreduce:2.5.4'
+}
+
+application {
+    mainClass = 'com.test.Driver'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.test.Driver'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
