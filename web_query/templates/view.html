@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>View file - {{ file }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+      pre { background:#f8f9fa; padding:16px; border-radius:6px; overflow:auto; }
+      .back { margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <div class="search-box">
+      <a class="back" href="/">&larr; 返回搜索</a>
+      <h2>{{ file }}</h2>
+    </div>
+    <div class="results" style="max-width:1000px; margin: 10px auto;">
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% else %}
+        <pre>
+{% for line in lines %}{{ line }}
+{% endfor %}
+        </pre>
+        {% if lines and lines|length >= 200 %}
+          <div>显示前 200 行。若需查看完整文件，请从 HDFS 直接下载。</div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </body>
+</html>

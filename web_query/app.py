@@ -88,6 +88,34 @@ def index():
     return render_template('index.html', query=query, data=data, error=error)
 
 
+@app.route('/view')
+def view_file():
+    """View a file from HDFS under the configured HDFS_DIR. Limits lines to avoid huge responses."""
+    fname = request.args.get('file', '')
+    # basic validation: no path traversal, only basename
+    if not fname or '/' in fname or '\\' in fname:
+        return "非法文件名", 400
+
+    # hdfs path
+    HDFS_DIR = "/input/sentences/files"
+    hdfs_path = f"{HDFS_DIR}/{fname}"
+
+    # run hdfs cat but limit output lines
+    try:
+        # Use shell pipeline to limit output on the hdfs client side and avoid SIGPIPE errors
+        max_lines = 200
+        cmd = f"hdfs dfs -cat '{hdfs_path}' | head -n {max_lines}"
+        out = subprocess.check_output(['bash', '-lc', cmd], stderr=subprocess.STDOUT, text=True)
+        out_lines = out.splitlines()
+    except subprocess.CalledProcessError as e:
+        # hdfs client returned non-zero, include its stderr/stdout
+        return render_template('view.html', file=fname, error=e.output or '读取 HDFS 文件失败', lines=None)
+    except Exception as e:
+        return render_template('view.html', file=fname, error=str(e), lines=None)
+
+    return render_template('view.html', file=fname, lines=out_lines)
+
+
 if __name__ == '__main__':
     # debug mode for development; in production use a WSGI server
     app.run(host='0.0.0.0', port=5000, debug=True)

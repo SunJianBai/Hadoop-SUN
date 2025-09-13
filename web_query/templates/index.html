@@ -28,7 +28,7 @@
           <ul class="result-list">
             {% for r in data.results %}
               <li class="result-item">
-                <div class="title">{{ r.file }}</div>
+                <div class="title"><a href="/view?file={{ r.file|e }}">{{ r.file }}</a></div>
                 <div class="snippet">出现次数：{{ r.count }}</div>
               </li>
             {% endfor %}
