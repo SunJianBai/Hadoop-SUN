@@ -1,5 +1,53 @@
 # Default ignored files
-/shelf/
-/.git/
-/data/ml-100k/
+
+# OS
+/.DS_Store
+/.Trash-
+
+# Node / Python / Java temporary
+*.log
+*.tmp
+*.swp
+*~
+
+# Python
+/__pycache__/
+*.py[cod]
+*.so
+
+# Virtual envs
+venv/
+env/
+.venv/
+
+# Java / Gradle
+/java_src/InvertedMapReduce/build/*
+/java_src/InvertedMapReduce/out/*
+*.class
+*.war
+*.ear
+gradle-app.setting
+/java_src/InvertedMapReduce/.gradle/*
+/java_src/InvertedMapReduce/gradle/*
+
+
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# macOS
+.DS_Store
+
+# HDFS / dataset folders (big test data)
 /data/sentences/
+
+
+# Git internals
+/.git/
