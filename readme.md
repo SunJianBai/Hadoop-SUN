@@ -1,3 +1,22 @@
+# 文件说明
+
+- `scripts` 目录下的是脚本文件
+  - `scripts\bak` 目录下是全部的配置文件，有完全分布的和伪分布的，以及用于覆盖配置文件的脚本
+  - `scripts/sent.sh` 用于把本地的配置文件发送到其他节点机器上，并覆盖对方的文件。
+  - `scripts/start.sh , stop.sh`  用于启动和停止本地的`hadoop`服务
+  - `scripts/wordcut.py` 用于将大数据集分割成小块
+  - `scripts/upload_hdfs.py` 把本地分割好的数据集上传到`HDFS`里
+- `java_src` 目录下是 `MapReduce` 操作的核心代码
+  -  具体说明在 `java_src/README.md`  
+
+- `HBaseReaderQuery` 目录下是查询数据，验证环节的核心代码
+  -  具体说明在 `HBaseReaderQuery/README.md`  
+
+- `web_query` 目录下是web UI的核心代码
+  -  具体说明在 `web_query/README.md`  
+
+
+
 # 运行流程
 
 ## 处理原始数据
@@ -35,7 +54,7 @@ create 'InvertedIndexTable', 'info'
 truncate "InvertedIndexTable"
 ```
 
-## 运行程序
+## 运行MapReduce
 
 ### 编译jar包
 
@@ -51,7 +70,7 @@ cd java_src/InvertedMapReduce
 ./gradlew build
 ```
 
-### 查找 jar 包
+### 使用 jar 包
 
 编译完成后，jar 包一般在：
 
@@ -67,3 +86,38 @@ cd java_src/InvertedMapReduce
 ```bash
 hadoop jar build/libs/InvertedMapReduce-1.0-SNAPSHOT.jar /input/sentences/files
 ```
+
+跑完MapReduce后会把处理结果存入Hbase数据库中
+
+
+
+### 查询结果
+
+构建编译 `HBaseReaderQuery` 目录下的代码，获得jar包 `HBaseReaderQuery-1.0-SNAPSHOT.jar` 
+
+运行命令，最后面的单词是要查询的单词，根据实际需求更改
+
+```bash
+java -cp HBaseReaderQuery/target/HBaseReaderQuery-1.0-SNAPSHOT.jar:$(hbase classpath) \
+     com.test.HBaseReaderQuery InvertedIndexTable apple
+```
+
+输出结果，Value 的内容是这个单词出现的文件位置和次数
+
+```bash
+RowKey = apple
+Value  = file1.txt:3;file2.txt:5;
+```
+
+
+
+### web UI
+
+运行`web_query/app.py` , 这是基于Flask框架的web ui，调用了前面生成的jar包，可以可视化查询单词。
+
+运行后在 http://127.0.0.1:5000  查看![image-20250913204018306](https://raw.githubusercontent.com/SunJianBai/pictures/main/img/202509132040527.png)
+
+
+
+
+
