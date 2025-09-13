@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="search-box">
+      <h1 class="logo">MySearch</h1>
+      <form method="post" action="/">
+        <input class="search-input" name="q" value="{{ query|e }}" placeholder="在 InvertedIndexTable 中搜索单词" autofocus>
+        <button class="search-btn" type="submit">搜索</button>
+      </form>
+    </div>
+
+    <div class="results">
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      {% if data %}
+        {% if data.notfound %}
+          <div class="notfound">“{{ query|e }}” 未在表中找到。</div>
+        {% else %}
+          <div class="result-header">找到 {{ data.results|length }} 条结果</div>
+          <ul class="result-list">
+            {% for r in data.results %}
+              <li class="result-item">
+                <div class="title">{{ r.file }}</div>
+                <div class="snippet">出现次数：{{ r.count }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <footer class="footer">Search powered by HBaseReaderQuery</footer>
+  </body>
+</html>
