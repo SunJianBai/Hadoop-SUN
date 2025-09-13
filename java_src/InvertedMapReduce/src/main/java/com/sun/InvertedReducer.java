@@ -1,4 +1,4 @@
-package com.test;
+package com.sun;
 
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;

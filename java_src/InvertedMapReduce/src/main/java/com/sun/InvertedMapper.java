@@ -1,4 +1,4 @@
-package com.test;
+package com.sun;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
